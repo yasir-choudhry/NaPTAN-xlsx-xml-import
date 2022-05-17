@@ -1,0 +1,41 @@
+<StopPoint CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status="">
+  <AtcoCode></AtcoCode>
+  <Descriptor>
+    <CommonName></CommonName>
+    <Street></Street>
+  </Descriptor>
+  <Place>
+    <NptgLocalityRef></NptgLocalityRef>
+    <LocalityCentre></LocalityCentre>
+    <Location>
+      <Translation>
+        <GridType></GridType>
+        <Easting></Easting>
+        <Northing></Northing>
+        <Longitude></Longitude>
+        <Latitude></Latitude>
+      </Translation>
+    </Location>
+  </Place>
+  <StopClassification>
+    <StopType></StopType>
+    <OffStreet>
+      <Ferry>
+        <AccessArea />
+        <AnnotatedFerryRef RevisionNumber="">
+          <FerryRef></FerryRef>
+          <Name></Name>
+          <Location>
+            <GridType></GridType>
+            <Easting></Easting>
+            <Northing></Northing>
+          </Location>
+        </AnnotatedFerryRef>
+      </Ferry>
+    </OffStreet>
+  </StopClassification>
+  <StopAreas>
+    <StopAreaRef CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status=""></StopAreaRef>
+  </StopAreas>
+  <AdministrativeAreaRef></AdministrativeAreaRef>
+</StopPoint>

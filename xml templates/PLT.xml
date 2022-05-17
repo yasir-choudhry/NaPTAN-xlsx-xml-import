@@ -1,0 +1,34 @@
+<StopPoint CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status="">
+  <AtcoCode></AtcoCode>
+  <NaptanCode></NaptanCode>
+  <Descriptor>
+    <CommonName></CommonName>
+    <Landmark></Landmark>
+    <Street></Street>
+  </Descriptor>
+  <Place>
+    <NptgLocalityRef></NptgLocalityRef>
+    <LocalityCentre></LocalityCentre>
+    <Location>
+      <Translation>
+        <GridType></GridType>
+        <Easting></Easting>
+        <Northing></Northing>
+        <Longitude></Longitude>
+        <Latitude></Latitude>
+      </Translation>
+    </Location>
+  </Place>
+  <StopClassification>
+    <StopType></StopType>
+    <OffStreet>
+      <Metro>
+        <Platform />
+      </Metro>
+    </OffStreet>
+  </StopClassification>
+  <StopAreas>
+    <StopAreaRef CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status=""></StopAreaRef>
+  </StopAreas>
+  <AdministrativeAreaRef></AdministrativeAreaRef>
+</StopPoint>

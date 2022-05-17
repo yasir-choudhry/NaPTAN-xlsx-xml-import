@@ -1,0 +1,13 @@
+<StopArea CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status="">
+    <StopAreaCode></StopAreaCode>
+    <Name></Name>
+    <AdministrativeAreaRef></AdministrativeAreaRef>
+    <StopAreaType></StopAreaType>
+        <Location>
+            <GridType></GridType>
+            <Easting></Easting>
+            <Northing></Northing>
+            <Longitude></Longitude>
+            <Latitude></Latitude>
+    </Location>
+</StopArea>

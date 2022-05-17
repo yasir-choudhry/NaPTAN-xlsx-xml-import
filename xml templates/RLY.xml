@@ -1,0 +1,32 @@
+<StopPoint CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status="">
+    <AtcoCode></AtcoCode>
+    <Descriptor>
+        <CommonName></CommonName>
+    </Descriptor>
+    <Place>
+        <NptgLocalityRef></NptgLocalityRef>
+        <LocalityCentre></LocalityCentre>
+        <Location>
+            <GridType></GridType>
+            <Easting></Easting>
+            <Northing></Northing>
+        </Location>
+    </Place>
+    <StopClassification>
+        <StopType></StopType>
+        <OffStreet>
+            <Rail>
+                <AccessArea/>
+                <AnnotatedRailRef CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="">
+                    <TiplocRef></TiplocRef>
+                    <CrsRef></CrsRef>
+                    <StationName></StationName>
+                </AnnotatedRailRef>
+            </Rail>
+        </OffStreet>
+    </StopClassification>
+    <StopAreas>
+        <StopAreaRef CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="" Status=""></StopAreaRef>
+    </StopAreas>
+    <AdministrativeAreaRef></AdministrativeAreaRef>
+</StopPoint>
