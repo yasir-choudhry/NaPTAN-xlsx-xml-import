@@ -1,10 +1,6 @@
-import PySimpleGUI as sg
-import os.path
+import PySimpleGUI as PyGUI
 import time
 import pandas as pd
-import csv
-import os
-import re
 import datetime
 
 
@@ -13,8 +9,9 @@ def text_from_xml(xml_fp):
         text = f.read()
     return text
 
+
 def put_tag_in(xml_string, tag_name, tag_text, attributes):
-    if str(tag_text)=="nan":
+    if str(tag_text) == "nan":
         pass
     elif tag_name in attributes:
         # replace the attribute
@@ -27,6 +24,7 @@ def put_tag_in(xml_string, tag_name, tag_text, attributes):
         xml_string = xml_string.replace('></'+str(tag_name)+'>', '>'+str(tag_text)+'</'+str(tag_name)+'>')
     return xml_string
 
+
 def put_completed_template_in_main(xml_string, xml_main_fp, stop=True):
     main_xml_str = text_from_xml(xml_main_fp)
     if stop:
@@ -36,6 +34,7 @@ def put_completed_template_in_main(xml_string, xml_main_fp, stop=True):
     with open(xml_main_fp, 'w') as f:
         f.write(main_xml_str)
 
+
 def check_if_in_xml(string_to_check, xml_main_fp):
     main_xml_str = text_from_xml(xml_main_fp)
     if string_to_check in main_xml_str:
@@ -43,8 +42,10 @@ def check_if_in_xml(string_to_check, xml_main_fp):
     else:
         return False
 
+
 def get_xl_df(spreadsheet_fp, sheet):
-    return pd.read_excel(fp_xl, sheet_name=sheet)
+    return pd.read_excel(spreadsheet_fp, sheet_name=sheet)
+
 
 # These are not xml items and therefore need to be added differently
 attribute_name_list = ['CreationDateTime', 'ModificationDateTime', 'Modification', 'RevisionNumber', 'Status']
@@ -52,52 +53,54 @@ attribute_name_list = ['CreationDateTime', 'ModificationDateTime', 'Modification
 
 output_text_log = """--OUTPUT LOG--"""
 
+
 def add_to_log(log_var, str_to_add):
     log_var += "\n"+str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))+": "+str_to_add
     return log_var
 
+
 # First the window layout in 2 columns
 file_list_column = [
     [
-        sg.Text("Select main XML folder (where the 900 xmls are saved):"),
-        sg.In(size=(25, 1), enable_events=False, key="-MAIN FOLDER-"),
-        sg.FolderBrowse(),
+        PyGUI.Text("Select main XML folder (where the 900 xmls are saved):"),
+        PyGUI.In(size=(25, 1), enable_events=False, key="-MAIN FOLDER-"),
+        PyGUI.FolderBrowse(),
     ],
     [
-        sg.Text("Select templates folder (where the stop xml templates are saved):"),
-        sg.In(size=(25, 1), enable_events=False, key="-TEMPLATE FOLDER-"),
-        sg.FolderBrowse(),
+        PyGUI.Text("Select templates folder (where the stop xml templates are saved):"),
+        PyGUI.In(size=(25, 1), enable_events=False, key="-TEMPLATE FOLDER-"),
+        PyGUI.FolderBrowse(),
     ],
     [
-        sg.Text("Select Excel file (which contains the request(s)):"),
-        sg.Input(key='-IMPORT XLSX-'),
-        sg.FileBrowse(file_types=(("Excel Files", "*.xlsx"),))
+        PyGUI.Text("Select Excel file (which contains the request(s)):"),
+        PyGUI.Input(key='-IMPORT XLSX-'),
+        PyGUI.FileBrowse(file_types=(("Excel Files", "*.xlsx"),))
     ],
     [
-        sg.Button("Import from excel to xml")
+        PyGUI.Button("Import from excel to xml")
     ],
 ]
 
 
 output_viewer_column = [
-    [sg.Multiline(output_text_log, size=(80, 25), key='OUTPUT')]
+    [PyGUI.Multiline(output_text_log, size=(80, 25), key='OUTPUT')]
 ]
 
 # ----- Full layout -----
 layout = [
     [
-        sg.Column(file_list_column),
-        sg.VSeperator(),
-        sg.Column(output_viewer_column),
+        PyGUI.Column(file_list_column),
+        PyGUI.VSeperator(),
+        PyGUI.Column(output_viewer_column),
     ]
 ]
 
-window = sg.Window("Import new stops and stop areas", layout)
+window = PyGUI.Window("Import new stops and stop areas", layout)
 
 # Run the Event Loop
 while True:
     event, values = window.read()
-    if event == "Exit" or event == sg.WIN_CLOSED:
+    if event == "Exit" or event == PyGUI.WIN_CLOSED:
         break
     elif event == "Import from excel to xml":  # A spreadsheet was chosen
         try:
@@ -122,7 +125,8 @@ while True:
 
                 # check if atco code already exists
                 if check_if_in_xml("<AtcoCode>"+row["AtcoCode"]+"</AtcoCode>", orig_xml_folder+"/"+atco_prefix+".xml"):
-                    output_text_log = add_to_log(output_text_log, "ERROR! AtcoCode "+row["AtcoCode"]+" already in xml file!")
+                    output_text_log = add_to_log(output_text_log,
+                                                 "ERROR! AtcoCode "+row["AtcoCode"]+" already in xml file!")
 
                 else:
                     template = text_from_xml(fp_tp_folder+"/"+stop_type+".xml")
@@ -134,7 +138,9 @@ while True:
 
                     # add complete template to main xml
                     put_completed_template_in_main(template, orig_xml_folder+"/"+atco_prefix+".xml", stop=True)
-                    output_text_log = add_to_log(output_text_log, "added stop "+row["AtcoCode"]+" to file: " + orig_xml_folder+"/"+atco_prefix+".xml")
+                    output_text_log = add_to_log(output_text_log,
+                                                 "added stop "+row["AtcoCode"]+" to file: " + orig_xml_folder + "/" +
+                                                 atco_prefix + ".xml")
             # add areas
             areas_df = get_xl_df(fp_xl, "StopAreas")
             for index, row in areas_df.iterrows():
@@ -142,8 +148,10 @@ while True:
                 atco_prefix = row["StopAreaCode"][:3]
 
                 # check if stop area already exists
-                if check_if_in_xml("<StopAreaCode>"+row["StopAreaCode"]+"</StopAreaCode>", orig_xml_folder+"/"+atco_prefix+".xml"):
-                    output_text_log = add_to_log(output_text_log, "ERROR! StopAreaCode "+row["StopAreaCode"]+" already in xml file!")
+                if check_if_in_xml("<StopAreaCode>"+row["StopAreaCode"]+"</StopAreaCode>",
+                                   orig_xml_folder+"/"+atco_prefix+".xml"):
+                    output_text_log = add_to_log(output_text_log,
+                                                 "ERROR! StopAreaCode "+row["StopAreaCode"]+" already in xml file!")
 
                 else:
                     template = text_from_xml(fp_tp_folder+"/"+stop_type+".xml")
@@ -155,8 +163,8 @@ while True:
 
                     # add complete template to main xml
                     put_completed_template_in_main(template, orig_xml_folder+"/"+atco_prefix+".xml", stop=False)
-                    output_text_log = add_to_log(output_text_log, "added area "+row["StopAreaCode"]+" to file: " + orig_xml_folder+"/"+atco_prefix+".xml")
-
+                    output_text_log = add_to_log(output_text_log, "added area "+row["StopAreaCode"]+" to file: " +
+                                                 orig_xml_folder + "/" + atco_prefix + ".xml")
 
             window['OUTPUT'].update(value=output_text_log)
             time.sleep(0.5)
