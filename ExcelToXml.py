@@ -104,9 +104,12 @@ attribute_name_list = ['CreationDateTime', 'ModificationDateTime', 'Modification
 output_text_log = """--OUTPUT LOG--"""
 
 
-def add_to_log(log_var, str_to_add):
-    log_var += "\n"+str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S'))+": "+str_to_add
-    return log_var
+def add_to_log(str_to_add):
+    global window
+    global output_text_log
+    output_text_log += "\n" + str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S')) + ": " + \
+                       str_to_add
+    window['OUTPUT'].update(value=output_text_log)
 
 
 # the file names and local authority names of the cml files required
@@ -115,12 +118,13 @@ xml_name_la_names = {"910.xml": "National - National Rail / Great Britain (910)"
                      "930.xml": "National - National Ferry / Great Britain (930)",
                      "940.xml": "National - National Tram / Great Britain (940)"}
 
+
 if not check_national_xmls(list(xml_name_la_names.keys())):
-    output_text_log = add_to_log(output_text_log, "Missing xmls found, downloading from NaPTAN website")
+    add_to_log("Missing xmls found, downloading from NaPTAN website")
     delete_downloaded_xmls()
     for xml_name, la_name in xml_name_la_names.items():
         download_xml_from_naptan(la_name, xml_name)
-        output_text_log = add_to_log(output_text_log, "Downloaded "+xml_name)
+        add_to_log("Downloaded "+xml_name)
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -156,6 +160,71 @@ layout = [
 
 window = PyGUI.Window("Import new stops and stop areas", layout)
 
+
+def refresh_xmls(xml_la_dict):
+    global output_text_log
+    global window
+    delete_downloaded_xmls()
+    add_to_log("Deleted all xmls")
+    for xml_file_name, la in xml_la_dict.items():
+        download_xml_from_naptan(la, xml_file_name)
+        add_to_log("Downloaded " + xml_file_name)
+
+
+def add_stops(excel_file_path):
+    global output_text_log
+    global window
+    stops_df = get_xl_df(excel_file_path, "Stops")
+
+    for index, row in stops_df.iterrows():
+        stop_type = row["StopType"]
+        atco_prefix = row["AtcoCode"][:3]
+
+        # check if atco code already exists
+        if check_if_in_xml("<AtcoCode>" + row["AtcoCode"] + "</AtcoCode>",
+                           orig_xml_folder + "/" + atco_prefix + ".xml"):
+            add_to_log("ERROR! AtcoCode " + row["AtcoCode"] + " already in xml file!")
+
+        else:
+            template = text_from_xml(fp_tp_folder + "/" + stop_type + ".xml")
+
+            add_dict = row.to_dict()
+            # loop through each item in the row and add to the template
+            for key, value in add_dict.items():
+                template = put_tag_in(template, key, value, attribute_name_list)
+
+            # add complete template to main xml
+            put_completed_template_in_main(template, orig_xml_folder + "/" + atco_prefix + ".xml", stop=True)
+            add_to_log("added stop " + row["AtcoCode"] + " to file: " + orig_xml_folder + "/" + atco_prefix + ".xml")
+
+
+def add_areas(excel_file_path):
+    global output_text_log
+    global window
+    areas_df = get_xl_df(excel_file_path, "StopAreas")
+    for index, row in areas_df.iterrows():
+        stop_type = "StopArea"
+        atco_prefix = row["StopAreaCode"][:3]
+
+        # check if stop area already exists
+        if check_if_in_xml("<StopAreaCode>" + row["StopAreaCode"] + "</StopAreaCode>",
+                           orig_xml_folder + "/" + atco_prefix + ".xml"):
+            add_to_log("ERROR! StopAreaCode " + row["StopAreaCode"] + " already in xml file!")
+
+        else:
+            template = text_from_xml(fp_tp_folder + "/" + stop_type + ".xml")
+
+            add_dict = row.to_dict()
+            # loop through each item in the row
+            for key, value in add_dict.items():
+                template = put_tag_in(template, key, value, attribute_name_list)
+
+            # add complete template to main xml
+            put_completed_template_in_main(template, orig_xml_folder + "/" + atco_prefix + ".xml", stop=False)
+            add_to_log("added area " + row["StopAreaCode"] + " to file: " + orig_xml_folder + "/" +
+                       atco_prefix + ".xml")
+
+
 # Run the Event Loop
 while True:
     event, values = window.read()
@@ -163,87 +232,29 @@ while True:
         break
     elif event == "Refresh XML files (delete and re-download form NaPTAN website)":
         try:
-            delete_downloaded_xmls()
-            output_text_log = add_to_log(output_text_log, "Deleted all xmls")
-            window['OUTPUT'].update(value=output_text_log)
-            for xml_name, la_name in xml_name_la_names.items():
-                download_xml_from_naptan(la_name, xml_name)
-                output_text_log = add_to_log(output_text_log, "Downloaded " + xml_name)
-                window['OUTPUT'].update(value=output_text_log)
+            refresh_xmls(xml_name_la_names)
         except Exception as e:
-            output_text_log = add_to_log(output_text_log, "unexpected error when refreshing xmls")
-            window['OUTPUT'].update(value=output_text_log)
+            add_to_log("unexpected error when refreshing xmls")
             print(e)
             pass
 
     elif event == "Import from excel to xml":  # A spreadsheet was chosen
         try:
-            window['OUTPUT'].update(value=output_text_log)
             # set the folders and files from the GUI
             fp_xl = values["-IMPORT XLSX-"]
             fp_tp_folder = "xml templates"
             orig_xml_folder = "downloaded_xmls"
 
             # run the __main__ code but update log instead of print
-            output_text_log = add_to_log(output_text_log, fp_xl)
-            window['OUTPUT'].update(value=output_text_log)
+            add_to_log(fp_xl)
 
-            # add stops
-            stops_df = get_xl_df(fp_xl, "Stops")
+            add_stops(fp_xl)
+            add_areas(fp_xl)
 
-            for index, row in stops_df.iterrows():
-                stop_type = row["StopType"]
-                atco_prefix = row["AtcoCode"][:3]
-
-                # check if atco code already exists
-                if check_if_in_xml("<AtcoCode>"+row["AtcoCode"]+"</AtcoCode>", orig_xml_folder+"/"+atco_prefix+".xml"):
-                    output_text_log = add_to_log(output_text_log,
-                                                 "ERROR! AtcoCode "+row["AtcoCode"]+" already in xml file!")
-
-                else:
-                    template = text_from_xml(fp_tp_folder+"/"+stop_type+".xml")
-
-                    add_dict = row.to_dict()
-                    # loop through each item in the row and add to the template
-                    for key, value in add_dict.items():
-                        template = put_tag_in(template, key, value, attribute_name_list)
-
-                    # add complete template to main xml
-                    put_completed_template_in_main(template, orig_xml_folder+"/"+atco_prefix+".xml", stop=True)
-                    output_text_log = add_to_log(output_text_log,
-                                                 "added stop "+row["AtcoCode"]+" to file: " + orig_xml_folder + "/" +
-                                                 atco_prefix + ".xml")
-            # add areas
-            areas_df = get_xl_df(fp_xl, "StopAreas")
-            for index, row in areas_df.iterrows():
-                stop_type = "StopArea"
-                atco_prefix = row["StopAreaCode"][:3]
-
-                # check if stop area already exists
-                if check_if_in_xml("<StopAreaCode>"+row["StopAreaCode"]+"</StopAreaCode>",
-                                   orig_xml_folder+"/"+atco_prefix+".xml"):
-                    output_text_log = add_to_log(output_text_log,
-                                                 "ERROR! StopAreaCode "+row["StopAreaCode"]+" already in xml file!")
-
-                else:
-                    template = text_from_xml(fp_tp_folder+"/"+stop_type+".xml")
-
-                    add_dict = row.to_dict()
-                    # loop through each item in the row
-                    for key, value in add_dict.items():
-                        template = put_tag_in(template, key, value, attribute_name_list)
-
-                    # add complete template to main xml
-                    put_completed_template_in_main(template, orig_xml_folder+"/"+atco_prefix+".xml", stop=False)
-                    output_text_log = add_to_log(output_text_log, "added area "+row["StopAreaCode"]+" to file: " +
-                                                 orig_xml_folder + "/" + atco_prefix + ".xml")
-
-            window['OUTPUT'].update(value=output_text_log)
             time.sleep(0.5)
 
         except Exception as e:
-            output_text_log = add_to_log(output_text_log, "unexpected error when importing spreadsheet")
-            window['OUTPUT'].update(value=output_text_log)
+            add_to_log("unexpected error when importing spreadsheet")
             print(e)
             pass
 
