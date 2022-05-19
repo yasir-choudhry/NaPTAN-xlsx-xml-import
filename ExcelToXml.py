@@ -181,13 +181,11 @@ while True:
             window['OUTPUT'].update(value=output_text_log)
             # set the folders and files from the GUI
             fp_xl = values["-IMPORT XLSX-"]
-            fp_tp_folder = values["-TEMPLATE FOLDER-"]
-            orig_xml_folder = values["-MAIN FOLDER-"]
+            fp_tp_folder = "xml templates"
+            orig_xml_folder = "downloaded_xmls"
 
             # run the __main__ code but update log instead of print
             output_text_log = add_to_log(output_text_log, fp_xl)
-            output_text_log = add_to_log(output_text_log, fp_tp_folder)
-            output_text_log = add_to_log(output_text_log, orig_xml_folder)
             window['OUTPUT'].update(value=output_text_log)
 
             # add stops
