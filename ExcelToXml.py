@@ -112,7 +112,7 @@ def add_to_log(str_to_add):
     window['OUTPUT'].update(value=output_text_log)
 
 
-# the file names and local authority names of the cml files required
+# the file names and local authority names of the xml files required
 xml_name_la_names = {"910.xml": "National - National Rail / Great Britain (910)",
                      "920.xml": "National - National Air / Great Britain (920)",
                      "930.xml": "National - National Ferry / Great Britain (930)",
@@ -122,9 +122,9 @@ xml_name_la_names = {"910.xml": "National - National Rail / Great Britain (910)"
 if not check_national_xmls(list(xml_name_la_names.keys())):
     add_to_log("Missing xmls found, downloading from NaPTAN website")
     delete_downloaded_xmls()
-    for xml_name, la_name in xml_name_la_names.items():
-        download_xml_from_naptan(la_name, xml_name)
-        add_to_log("Downloaded "+xml_name)
+    for xml_name_, la_name_ in xml_name_la_names.items():
+        download_xml_from_naptan(la_name_, xml_name_)
+        add_to_log("Downloaded "+xml_name_)
 
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -171,7 +171,7 @@ def refresh_xmls(xml_la_dict):
         add_to_log("Downloaded " + xml_file_name)
 
 
-def add_stops(excel_file_path):
+def add_stops(excel_file_path, template_folder, xml_folder):
     global output_text_log
     global window
     stops_df = get_xl_df(excel_file_path, "Stops")
@@ -182,11 +182,11 @@ def add_stops(excel_file_path):
 
         # check if atco code already exists
         if check_if_in_xml("<AtcoCode>" + row["AtcoCode"] + "</AtcoCode>",
-                           orig_xml_folder + "/" + atco_prefix + ".xml"):
+                           xml_folder + "/" + atco_prefix + ".xml"):
             add_to_log("ERROR! AtcoCode " + row["AtcoCode"] + " already in xml file!")
 
         else:
-            template = text_from_xml(fp_tp_folder + "/" + stop_type + ".xml")
+            template = text_from_xml(template_folder + "/" + stop_type + ".xml")
 
             add_dict = row.to_dict()
             # loop through each item in the row and add to the template
@@ -194,11 +194,11 @@ def add_stops(excel_file_path):
                 template = put_tag_in(template, key, value, attribute_name_list)
 
             # add complete template to main xml
-            put_completed_template_in_main(template, orig_xml_folder + "/" + atco_prefix + ".xml", stop=True)
-            add_to_log("added stop " + row["AtcoCode"] + " to file: " + orig_xml_folder + "/" + atco_prefix + ".xml")
+            put_completed_template_in_main(template, xml_folder + "/" + atco_prefix + ".xml", stop=True)
+            add_to_log("added stop " + row["AtcoCode"] + " to file: " + xml_folder + "/" + atco_prefix + ".xml")
 
 
-def add_areas(excel_file_path):
+def add_areas(excel_file_path, template_folder, xml_folder):
     global output_text_log
     global window
     areas_df = get_xl_df(excel_file_path, "StopAreas")
@@ -208,11 +208,11 @@ def add_areas(excel_file_path):
 
         # check if stop area already exists
         if check_if_in_xml("<StopAreaCode>" + row["StopAreaCode"] + "</StopAreaCode>",
-                           orig_xml_folder + "/" + atco_prefix + ".xml"):
+                           xml_folder + "/" + atco_prefix + ".xml"):
             add_to_log("ERROR! StopAreaCode " + row["StopAreaCode"] + " already in xml file!")
 
         else:
-            template = text_from_xml(fp_tp_folder + "/" + stop_type + ".xml")
+            template = text_from_xml(template_folder + "/" + stop_type + ".xml")
 
             add_dict = row.to_dict()
             # loop through each item in the row
@@ -220,8 +220,8 @@ def add_areas(excel_file_path):
                 template = put_tag_in(template, key, value, attribute_name_list)
 
             # add complete template to main xml
-            put_completed_template_in_main(template, orig_xml_folder + "/" + atco_prefix + ".xml", stop=False)
-            add_to_log("added area " + row["StopAreaCode"] + " to file: " + orig_xml_folder + "/" +
+            put_completed_template_in_main(template, xml_folder + "/" + atco_prefix + ".xml", stop=False)
+            add_to_log("added area " + row["StopAreaCode"] + " to file: " + xml_folder + "/" +
                        atco_prefix + ".xml")
 
 
@@ -248,8 +248,8 @@ while True:
             # run the __main__ code but update log instead of print
             add_to_log(fp_xl)
 
-            add_stops(fp_xl)
-            add_areas(fp_xl)
+            add_stops(fp_xl, fp_tp_folder, orig_xml_folder)
+            add_areas(fp_xl, fp_tp_folder, orig_xml_folder)
 
             time.sleep(0.5)
 
