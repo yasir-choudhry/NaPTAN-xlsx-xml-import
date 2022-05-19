@@ -1,5 +1,5 @@
 # NaPTAN-xlsx-xml-import
-This code imports stop information from a spreadsheet, downloads XML files from NaPTAN website then validate and adds stop information to those XML files.
+This code imports stop information from a spreadsheet, downloads XML files from NaPTAN website then validates and adds stop information to those XML files.
 
 1. Load spreadsheet [✅️**Done**✅️]
 2. Download required xml files from NaPTAN [✅️**Done**✅️]
