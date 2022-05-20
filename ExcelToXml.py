@@ -1,3 +1,9 @@
+"""
+This code aims to allow for a spreadsheet (which would ideally be filled out by those requesting new stops and stop
+areas) to be imported into the relevant xml file.
+
+It currently downloads xml from the NaPTAN website
+"""
 import PySimpleGUI as PyGUI
 import time
 import pandas as pd
@@ -5,49 +11,6 @@ import datetime
 import os
 import requests
 import shutil
-
-
-def text_from_xml(xml_fp):
-    with open(xml_fp, "r") as f:
-        text = f.read()
-    return text
-
-
-def put_tag_in(xml_string, tag_name, tag_text, attributes):
-    if str(tag_text) == "nan":
-        pass
-    elif tag_name in attributes:
-        # replace the attribute
-        if 'Date' in tag_name:
-            # add date in iso format
-            tag_text = str(datetime.datetime.fromisoformat(str(tag_text)).isoformat())
-        xml_string = xml_string.replace(str(tag_name)+'=""', str(tag_name)+'="'+str(tag_text)+'"')
-    else:
-        # replace the tag
-        xml_string = xml_string.replace('></'+str(tag_name)+'>', '>'+str(tag_text)+'</'+str(tag_name)+'>')
-    return xml_string
-
-
-def put_completed_template_in_main(xml_string, xml_main_fp, stop=True):
-    main_xml_str = text_from_xml(xml_main_fp)
-    if stop:
-        main_xml_str = main_xml_str.replace("</StopPoints>", xml_string+"</StopPoints>")
-    else:
-        main_xml_str = main_xml_str.replace("</StopAreas>\n</NaPTAN>", xml_string+"</StopAreas>\n</NaPTAN>")
-    with open(xml_main_fp, 'w') as f:
-        f.write(main_xml_str)
-
-
-def check_if_in_xml(string_to_check, xml_main_fp):
-    main_xml_str = text_from_xml(xml_main_fp)
-    if string_to_check in main_xml_str:
-        return True
-    else:
-        return False
-
-
-def get_xl_df(spreadsheet_fp, sheet):
-    return pd.read_excel(spreadsheet_fp, sheet_name=sheet)
 
 
 def download_xml_from_naptan(la_name: str, xml_name: str, down_dir="downloaded_xmls"):
@@ -97,7 +60,63 @@ def delete_downloaded_xmls(down_dir="downloaded_xmls"):
     os.makedirs(down_dir)
 
 
-# These are not xml items and therefore need to be added differently
+def text_from_xml(xml_fp: str):
+    """
+    get contents of xml file as string
+    :param xml_fp: file location
+    :return: file as string
+    """
+    with open(xml_fp, "r") as f:
+        text = f.read()
+    return text
+
+
+def put_tag_in(xml_string: str, tag_name: str, tag_text: str, attributes: list):
+    """
+    Fill in the xml template with the fields from the spreadsheet row
+    :param xml_string:
+    :param tag_name:
+    :param tag_text:
+    :param attributes:
+    :return:
+    """
+    if str(tag_text) == "nan":
+        pass
+    elif tag_name in attributes:
+        # replace the attribute
+        if 'Date' in tag_name:
+            # add date in iso format
+            tag_text = str(datetime.datetime.fromisoformat(str(tag_text)).isoformat())
+        xml_string = xml_string.replace(str(tag_name)+'=""', str(tag_name)+'="'+str(tag_text)+'"')
+    else:
+        # replace the tag
+        xml_string = xml_string.replace('></'+str(tag_name)+'>', '>'+str(tag_text)+'</'+str(tag_name)+'>')
+    return xml_string
+
+
+def put_completed_template_in_main(xml_string, xml_main_fp, stop=True):
+    main_xml_str = text_from_xml(xml_main_fp)
+    if stop:
+        main_xml_str = main_xml_str.replace("</StopPoints>", xml_string+"</StopPoints>")
+    else:
+        main_xml_str = main_xml_str.replace("</StopAreas>\n</NaPTAN>", xml_string+"</StopAreas>\n</NaPTAN>")
+    with open(xml_main_fp, 'w') as f:
+        f.write(main_xml_str)
+
+
+def check_if_in_xml(string_to_check, xml_main_fp):
+    main_xml_str = text_from_xml(xml_main_fp)
+    if string_to_check in main_xml_str:
+        return True
+    else:
+        return False
+
+
+def get_xl_df(spreadsheet_fp, sheet):
+    return pd.read_excel(spreadsheet_fp, sheet_name=sheet)
+
+
+# These are not xml items (they are tags) and therefore need to be added differently
 attribute_name_list = ['CreationDateTime', 'ModificationDateTime', 'Modification', 'RevisionNumber', 'Status']
 
 
@@ -245,7 +264,6 @@ while True:
             fp_tp_folder = "xml templates"
             orig_xml_folder = "downloaded_xmls"
 
-            # run the __main__ code but update log instead of print
             add_to_log(fp_xl)
 
             add_stops(fp_xl, fp_tp_folder, orig_xml_folder)
@@ -259,3 +277,4 @@ while True:
             pass
 
 window.close()
+
