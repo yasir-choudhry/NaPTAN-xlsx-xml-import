@@ -1,0 +1,20 @@
+<NptgLocality CreationDateTime="" ModificationDateTime="" Modification="" RevisionNumber="">
+  <NptgLocalityCode></NptgLocalityCode>
+  <Descriptor>
+    <LocalityName xml:lang="EN"></LocalityName>
+    <Qualify>
+      <QualifierName xml:lang="en"></QualifierName>
+    </Qualify>
+  </Descriptor>
+  <AdministrativeAreaRef></AdministrativeAreaRef>
+  <NptgDistrictRef></NptgDistrictRef>
+  <SourceLocalityType></SourceLocalityType>
+  <Location>
+    <Translation>
+      <Easting></Easting>
+      <Northing></Northing>
+      <Longitude></Longitude>
+      <Latitude></Latitude>
+    </Translation>
+  </Location>
+</NptgLocality>

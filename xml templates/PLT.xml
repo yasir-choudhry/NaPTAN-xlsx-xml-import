@@ -3,8 +3,8 @@
   <NaptanCode></NaptanCode>
   <Descriptor>
     <CommonName></CommonName>
-    <Landmark></Landmark>
     <Street></Street>
+    <Indicator></Indicator>
   </Descriptor>
   <Place>
     <NptgLocalityRef></NptgLocalityRef>
