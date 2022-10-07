@@ -21,7 +21,7 @@ NptgLocalityCodes = []
 
 def download_extract_get_nptg_localities(down_dir="downloaded_nptg"):
     """
-    download nptg data as a zipped csv. Extract this and load the locality reference numbers from the localities csv
+    download nptg data as a csv. Load the locality reference numbers from the localities csv
     :param down_dir: directory where it is to be downloaded
     :return:
     """
@@ -33,12 +33,12 @@ def download_extract_get_nptg_localities(down_dir="downloaded_nptg"):
         pass
     shutil.rmtree(down_dir)  # delete old data
     os.makedirs(down_dir)  # create folder again
-    response = requests.post('http://naptan.app.dft.gov.uk/datarequest/nptg.ashx?format=csv')
+    response = requests.post('https://beta-naptan.dft.gov.uk/Download/File/Localities.csv')
     data = response.content
-    with open(down_dir+"/nptgcsv.zip", 'wb') as s:
+    with open(down_dir+"/localities.csv", 'wb') as s:
         s.write(data)  # save nptg data to download folder
-    with zipfile.ZipFile(down_dir+"/nptgcsv.zip", "r") as zip_ref:
-        zip_ref.extractall(down_dir)  # extract the zip file
+    # with zipfile.ZipFile(down_dir+"/nptgcsv.zip", "r") as zip_ref:
+    #     zip_ref.extractall(down_dir)  # extract the zip file
     with open(down_dir+'/localities.csv', newline='', encoding='iso-8859-1') as f:
         reader = csv.reader(f)  # read the localities csv
         row1 = next(reader)  # ignore the first row with headers
@@ -139,12 +139,12 @@ def download_nptg_from_naptan(down_dir="downloaded_nptg_xml"):
     :param down_dir: directory where the files are to be saved
     :return:
     """
-    response = requests.post('https://naptan.app.dft.gov.uk/datarequest/nptg.ashx')
+    response = requests.post('https://beta-naptan.dft.gov.uk/Download/File/NPTG.xml')
     data = response.content
-    with open(down_dir+"/nptgxml.zip", 'wb') as s:
+    with open(down_dir+"/NPTG.xml", 'wb') as s:
         s.write(data)  # save nptg data to download folder
-    with zipfile.ZipFile(down_dir+"/nptgxml.zip", "r") as zip_ref:
-        zip_ref.extractall(down_dir)  # extract the zip file
+    # with zipfile.ZipFile(down_dir+"/nptgxml.zip", "r") as zip_ref:
+    #     zip_ref.extractall(down_dir)  # extract the zip file
     xml_fp = down_dir+"/NPTG.xml"
     with open(xml_fp, "r") as f:
         text_all = f.read()
